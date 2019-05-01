@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha --require test/setup.js",
+    "watch-test": "nodemon --watch src --watch test --watch .env --exec \"npm run test\" ",
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "predeploy": "npm audit",
@@ -24,6 +25,7 @@
     "winston": "^3.2.1"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
     "mocha": "^6.1.4",
     "nodemon": "^1.18.11",
     "supertest": "^4.0.2"
