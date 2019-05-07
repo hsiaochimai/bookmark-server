@@ -42,5 +42,32 @@ describe.only("Bookmarks Endpoints", function() {
             })
          })
   });
-  
+  describe(`GET /bookmarks/:id `,()=>{ 
+    context(`Given no bookmarks`, () => {
+        it(`responds with 404`, () => {
+          const bookmarkId = 123456
+          return supertest(app)
+            .get(`/bookmarks/${bookmarkId}`)
+            .set('Authorization', `Bearer ${API_TOKEN}`) 
+            .expect(404, { error: { message: `bookmark doesn't exist` } })
+        })
+      })
+    context('Given there are bookmarks in the database', () => {
+        const testBookmarks = makeBookmarksArray()
+        beforeEach('insert bookmarks', () => {
+          return db
+            .into('bookmarks')
+            .insert(testBookmarks)
+        })
+ it(' responds with 200 and the specified bookmark', () => {
+             const bookmarkId = 2
+             const expectedBookmarks = testBookmarks[bookmarkId - 1]
+             return supertest(app)
+               .get(`/bookmarks/${bookmarkId}`)
+               .set('Authorization', `Bearer ${API_TOKEN}`) 
+               .expect(200, expectedBookmarks)
+           })
+})
+
+})
 });
