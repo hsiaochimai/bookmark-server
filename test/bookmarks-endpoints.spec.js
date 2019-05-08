@@ -4,8 +4,15 @@ const app = require("../src/app");
 const { makeBookmarksArray } = require("./bookmarks.fixture");
 const { API_TOKEN } = process.env;
 
-describe.only("Bookmarks Endpoints", function() {
-  let db;
+let db;
+const testBookmarks = makeBookmarksArray()
+const insertBookmarks = () => {
+  return db
+    .into('bookmarks')
+    .insert(testBookmarks)
+}
+
+describe.only("Bookmarks Endpoints", function () {
 
   before("make knex instance", () => {
     db = knex({
@@ -23,51 +30,41 @@ describe.only("Bookmarks Endpoints", function() {
       it(`responds with 200 and an empty list`, () => {
         return supertest(app)
           .get("/bookmarks")
-          .set('Authorization', `Bearer ${API_TOKEN}`) 
+          .set('Authorization', `Bearer ${API_TOKEN}`)
           .expect(200, []);
       });
     });
     context('Given there are bookmarks in the database', () => {
-      const testBookmarks = makeBookmarksArray()
-      beforeEach('insert bookmarks', () => {
-        return db
-          .into('bookmarks')
-          .insert(testBookmarks)
-      })
+      beforeEach('insert bookmarks', insertBookmarks)
       it('GET /bookmarks responds with 200 and all of the bookmarks', () => {
-              return supertest(app)
-                .get('/bookmarks')
-                .set('Authorization', `Bearer ${API_TOKEN}`) 
-                .expect(200, testBookmarks)
-            })
-         })
-  });
-  describe(`GET /bookmarks/:id `,()=>{ 
-    context(`Given no bookmarks`, () => {
-        it(`responds with 404`, () => {
-          const bookmarkId = 123456
-          return supertest(app)
-            .get(`/bookmarks/${bookmarkId}`)
-            .set('Authorization', `Bearer ${API_TOKEN}`) 
-            .expect(404, { error: { message: `bookmark doesn't exist` } })
-        })
+        return supertest(app)
+          .get('/bookmarks')
+          .set('Authorization', `Bearer ${API_TOKEN}`)
+          .expect(200, testBookmarks)
       })
+    })
+  });
+  describe(`GET /bookmarks/:id `, () => {
+    context(`Given no bookmarks`, () => {
+      it(`responds with 404`, () => {
+        const bookmarkId = 123456
+        return supertest(app)
+          .get(`/bookmarks/${bookmarkId}`)
+          .set('Authorization', `Bearer ${API_TOKEN}`)
+          .expect(404, { error: { message: `bookmark doesn't exist` } })
+      })
+    })
     context('Given there are bookmarks in the database', () => {
-        const testBookmarks = makeBookmarksArray()
-        beforeEach('insert bookmarks', () => {
-          return db
-            .into('bookmarks')
-            .insert(testBookmarks)
-        })
- it(' responds with 200 and the specified bookmark', () => {
-             const bookmarkId = 2
-             const expectedBookmarks = testBookmarks[bookmarkId - 1]
-             return supertest(app)
-               .get(`/bookmarks/${bookmarkId}`)
-               .set('Authorization', `Bearer ${API_TOKEN}`) 
-               .expect(200, expectedBookmarks)
-           })
-})
+      beforeEach('insert bookmarks', insertBookmarks)
+      it(' responds with 200 and the specified bookmark', () => {
+        const bookmarkId = 2
+        const expectedBookmarks = testBookmarks[bookmarkId - 1]
+        return supertest(app)
+          .get(`/bookmarks/${bookmarkId}`)
+          .set('Authorization', `Bearer ${API_TOKEN}`)
+          .expect(200, expectedBookmarks)
+      })
+    })
 
-})
+  })
 });
