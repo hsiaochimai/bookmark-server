@@ -14,7 +14,7 @@ const serializeBookmark = bookmark => ({
   title: xss(bookmark.title),
   url_link: xss(bookmark.url_link),
   descript: xss(bookmark.descript),
-  rating: xss(bookmark.rating)
+  rating: bookmark.rating
 });
 
 bookmarkRouter
@@ -22,7 +22,9 @@ bookmarkRouter
   .get((req, res, next) => {
     const knexInstance = req.app.get("db");
     BookmarksService.getAllBookmarks(knexInstance)
+    
       .then(bookmarks => {
+        console.log(bookmarks)
         res.json(bookmarks.map(serializeBookmark));
       })
       .catch(next);
@@ -77,11 +79,12 @@ bookmarkRouter
     })  
     
   .delete((req, res, next) => {
-    console.log(`delete was called`)
     BookmarksService.deleteBookmarks(req.app.get('db'), req.params.id)
     .then(()=>{
-      
-      res.status(204).end();
+      res
+      .status(204)
+      .json({message:'Delete Success'})
+      .end();
     })
     .catch(next);
   })

@@ -44,7 +44,7 @@ describe.only("Bookmarks Endpoints", function () {
       })
     })
   });
-  describe(`GET /bookmarks/:id `, () => {
+  describe(`GET /bookmarks/:id `, (done) => {
     context(`Given no bookmarks`, () => {
       it(`responds with 404`, () => {
         const bookmarkId = 123456;
@@ -62,10 +62,11 @@ describe.only("Bookmarks Endpoints", function () {
       it(" responds with 200 and the specified bookmark", () => {
         const bookmarkId = 2;
         const expectedBookmarks = testBookmarks[bookmarkId - 1];
-        return supertest(app)
+         supertest(app)
           .get(`/bookmarks/${bookmarkId}`)
           .set("Authorization", `Bearer ${API_TOKEN}`)
-          .expect(200, expectedBookmarks);
+          .expect(200, expectedBookmarks)
+          
       });
     });
   });
