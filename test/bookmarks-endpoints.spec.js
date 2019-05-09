@@ -4,8 +4,15 @@ const app = require("../src/app");
 const { makeBookmarksArray } = require("./bookmarks.fixture");
 const { API_TOKEN } = process.env;
 
-describe.only("Bookmarks Endpoints", function() {
-  let db;
+let db;
+const testBookmarks = makeBookmarksArray()
+const insertBookmarks = () => {
+  return db
+    .into('bookmarks')
+    .insert(testBookmarks)
+}
+
+describe.only("Bookmarks Endpoints", function () {
 
   before("make knex instance", () => {
     db = knex({
@@ -23,22 +30,19 @@ describe.only("Bookmarks Endpoints", function() {
       it(`responds with 200 and an empty list`, () => {
         return supertest(app)
           .get("/bookmarks")
-          .set("Authorization", `Bearer ${API_TOKEN}`)
+          .set('Authorization', `Bearer ${API_TOKEN}`)
           .expect(200, []);
       });
     });
-    context("Given there are bookmarks in the database", () => {
-      const testBookmarks = makeBookmarksArray();
-      beforeEach("insert bookmarks", () => {
-        return db.into("bookmarks").insert(testBookmarks);
-      });
-      it("GET /bookmarks responds with 200 and all of the bookmarks", () => {
+    context('Given there are bookmarks in the database', () => {
+      beforeEach('insert bookmarks', insertBookmarks)
+      it('GET /bookmarks responds with 200 and all of the bookmarks', () => {
         return supertest(app)
-          .get("/bookmarks")
-          .set("Authorization", `Bearer ${API_TOKEN}`)
-          .expect(200, testBookmarks);
-      });
-    });
+          .get('/bookmarks')
+          .set('Authorization', `Bearer ${API_TOKEN}`)
+          .expect(200, testBookmarks)
+      })
+    })
   });
   describe(`GET /bookmarks/:id `, () => {
     context(`Given no bookmarks`, () => {
