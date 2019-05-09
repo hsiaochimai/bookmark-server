@@ -33,7 +33,7 @@ bookmarkRouter
     const { title, url_link, descript, rating } = req.body;
     const newBookmark = { title, url_link, descript, rating };
     for (const [key, value] of Object.entries(newBookmark)) {
-      if (value === null) {
+      if (value === null || value === undefined) {
         logger.error(`Missing '${key}' in request body`);
         return res.status(400).json({
           error: { message: `Missing '${key}' in request body` }

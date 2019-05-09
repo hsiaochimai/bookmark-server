@@ -183,23 +183,21 @@ describe.only("Bookmarks Endpoints", function () {
   })
 })
 
-// describe.only('POST /bookmarks', () => {
-//   it(`responds with 400 missing 'title' if not supplied`, () => {
-//     const newBookmarkMissingTitle = {
-//       // title: 'test-title',
-//       url_link: 'https://test.com',
-//       rating: 1,
-//       descript:"hello"
-//     }
-//     return supertest(app)
-//       .post(`/bookmarks`)
-//       .send(newBookmarkMissingTitle)
-//       .set('Authorization', `Bearer ${API_TOKEN}`)
-//       .expect(400, {
-//         error: { message: `Missing 'title' in request body`  }
-//       })
+describe.only('POST /bookmarks', () => {
+  it(`responds with 400 missing 'title' if not supplied`, () => {
+    const newBookmarkMissingTitle = {
+      // title: 'test-title',
+      url_link: 'https://test.com',
+      rating: 1,
+      descript:"hello"
+    }
+    return supertest(app)
+      .post(`/bookmarks`)
+      .send(newBookmarkMissingTitle)
+      .set('Authorization', `Bearer ${API_TOKEN}`)
+      .expect(400, {
+        error: { message: `Missing 'title' in request body`  }
+      })
+    })
   })
-
-
-
-
+})
