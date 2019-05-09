@@ -1,7 +1,7 @@
 const { expect } = require("chai");
 const knex = require("knex");
 const app = require("../src/app");
-const { makeBookmarksArray } = require("./bookmarks.fixture");
+const { makeBookmarksArray, makeMaliciousBookmark } = require("./bookmarks.fixture");
 const { API_TOKEN } = process.env;
 
 let db;
@@ -43,8 +43,28 @@ describe.only("Bookmarks Endpoints", function () {
           .expect(200, testBookmarks)
       })
     })
+    context(`Given an XSS attack article`, () => {
+      const { maliciousBookmark, expectedBookmark } = makeMaliciousBookmark()
+      
+           beforeEach('insert malicious article', () => {
+             return db
+               .into('bookmarks')
+               .insert([ maliciousBookmark ])
+           })
+      
+           it('removes XSS attack content', () => {
+             return supertest(app)
+               .get(`/bookmarks`)
+               .set('Authorization', `Bearer ${API_TOKEN}`)
+              .expect(200)
+               .expect(res => {
+                expect(res.body[0].title).to.eql(expectedBookmark.title)
+                expect(res.body[0].descript).to.eql(expectedBookmark.descript)
+               })
+           })
+         })
   });
-  describe(`GET /bookmarks/:id `, (done) => {
+  describe.only(`GET /bookmarks/:id `, (done) => {
     context(`Given no bookmarks`, () => {
       it(`responds with 404`, () => {
         const bookmarkId = 123456;
@@ -69,5 +89,25 @@ describe.only("Bookmarks Endpoints", function () {
           
       });
     });
+    context(`Given an XSS attack article`, () => {
+      const { maliciousBookmark, expectedBookmark } = makeMaliciousBookmark()
+      
+           before('insert malicious bookmark', () => {
+             return db
+               .into('bookmarks')
+               .insert([ maliciousBookmark ])
+           })
+      
+           it('removes XSS attack content', () => {
+            return supertest(app)
+               .get(`/bookmarks/${maliciousBookmark.id}`)
+               .set("Authorization", `Bearer ${API_TOKEN}`)
+               .expect(200)
+               .expect(res => {
+                expect(res.body.title).to.eql(expectedBookmark.title)
+                expect(res.body.descript).to.eql(expectedBookmark.descript)
+               })
+           })
+         })
   });
 });

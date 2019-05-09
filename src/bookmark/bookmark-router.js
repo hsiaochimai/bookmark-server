@@ -14,7 +14,7 @@ const serializeBookmark = bookmark => ({
   title: xss(bookmark.title),
   url_link: xss(bookmark.url_link),
   descript: xss(bookmark.descript),
-  rating: bookmark.rating
+  rating: Number(bookmark.rating)
 });
 
 bookmarkRouter
@@ -31,7 +31,6 @@ bookmarkRouter
   })
   .post(bodyParser, (req, res, next) => {
     const { title, url_link, descript, rating } = req.body;
-    console.log(`req body is`, req.body);
     const newBookmark = { title, url_link, descript, rating };
     for (const [key, value] of Object.entries(newBookmark)) {
       if (value === null) {
@@ -51,6 +50,7 @@ bookmarkRouter
     }
     BookmarksService.insertBookmarks(req.app.get("db"), newBookmark)
       .then(bookmark => {
+        logger.info(`bookmark with id ${bookmark.id} created`)
         res
           .status(201)
           .location(`/bookmarks/${bookmark.id}`)
@@ -61,8 +61,8 @@ bookmarkRouter
 bookmarkRouter
   .route("/bookmarks/:id")
   .all((req, res, next) => {
-    const knexInstance = req.app.get("db");
-    BookmarksService.getById(knexInstance, req.params.id)
+
+    BookmarksService.getById(req.app.get("db"), req.params.id)
       .then(bookmark => {
         if (!bookmark) {
           return res.status(404).json({
@@ -70,7 +70,7 @@ bookmarkRouter
           });
         }
         res.bookmark = bookmark;
-        //  next();
+          next();
       })
       .catch(next)
   })
@@ -79,26 +79,16 @@ bookmarkRouter
     })  
     
   .delete((req, res, next) => {
+    
     BookmarksService.deleteBookmarks(req.app.get('db'), req.params.id)
     .then(()=>{
+      logger.info(`Bookmark with id ${req.params.id} deleted.`)
       res
-      .status(204)
-      .json({message:'Delete Success'})
-      .end();
+      .status(204).end();
+      
+      
     })
     .catch(next);
   })
-  //DO NOT USE BELOW
-    // const { id } = req.params;
-    // const bmIndex = bookmarks.findIndex(item => item.id === id);
-    // if (bmIndex === -1) {
-    //   logger.error(`bookmark with id ${id} not found.`);
-    //   return res
-    //     .status(404)
-    //     .send("You can not delete a card that does not exist");
-    // }
-    // bookmarks.splice(bmIndex, 1);
-    // logger.info(`bookmark with id ${id} deleted`);
-    // return res.status(204).send();
-  // });
+
 module.exports = bookmarkRouter;
