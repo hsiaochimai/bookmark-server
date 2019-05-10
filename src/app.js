@@ -20,7 +20,7 @@ app.use(function validateBearerToken (req, res, next){
   // move to the next middleware
   next()
 })
-app.use( bookmarkRouter)
+app.use( '/api/bookmarks', bookmarkRouter)
 
 app.use(function errorHandler(error, req, res, next) {
     let response
