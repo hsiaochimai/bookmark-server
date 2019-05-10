@@ -99,7 +99,7 @@ bookmarkRouter
     if (numberOfValues < 3) {
       return res.status(400).json({
         error: {
-          message: `Request body must content either 'title, url_link, descript or rating'`
+          message: `Request body must content either 'title, url_link, or rating'`
         }
       });
     }

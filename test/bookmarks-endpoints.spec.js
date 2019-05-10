@@ -237,10 +237,11 @@ describe.only("Bookmarks Endpoints", function() {
         const idToUpdate = 2;
         return supertest(app)
           .patch(`/api/bookmarks/${idToUpdate}`)
+          .set("Authorization", `Bearer ${API_TOKEN}`)
           .send({ irrelevantField: "foo" })
           .expect(400, {
             error: {
-              message: `Request body must content either 'title', 'style' or 'content'`
+              message: `Request body must content either 'title, url_link, or rating'`
             }
           });
       });
@@ -256,14 +257,16 @@ describe.only("Bookmarks Endpoints", function() {
 
         return supertest(app)
           .patch(`/api/bookmarks/${idToUpdate}`)
+          .set("Authorization", `Bearer ${API_TOKEN}`)
           .send({
             ...updateBookmark,
-            fieldToIgnore: "should not be in GET response"
+            // fieldToIgnore: "should not be in GET response"
           })
           .expect(204)
           .then(res =>
             supertest(app)
               .get(`/api/bookmarks/${idToUpdate}`)
+              .set("Authorization", `Bearer ${API_TOKEN}`)
               .expect(expectedBookmark)
           );
       });
