@@ -202,6 +202,71 @@ describe.only("Bookmarks Endpoints", function() {
           .expect(404, { error: { message: `bookmark doesn't exist` } });
       });
     });
-    
+    context("Given there are articles in the database", () => {
+      const testBookmarks = makeBookmarksArray();
+
+      beforeEach("insert articles", () => {
+        return db.into("bookmarks").insert(testBookmarks);
+      });
+
+      it("responds with 204 and updates the bookmark", () => {
+        const idToUpdate = 3;
+        const updateBookmark = {
+          title: "Test 4",
+          url_link: "http://test4.com/",
+          descript: "Test 4",
+          rating: 1
+        };
+        const expectedBookmark = {
+          ...testBookmarks[idToUpdate - 1],
+          ...updateBookmark
+        };
+        return supertest(app)
+          .patch(`/api/bookmarks/${idToUpdate}`)
+          .set("Authorization", `Bearer ${API_TOKEN}`)
+          .send(updateBookmark)
+          .expect(204)
+          .then(res =>
+            supertest(app)
+              .get(`/api/bookmarks/${idToUpdate}`)
+              .set("Authorization", `Bearer ${API_TOKEN}`)
+              .expect(expectedBookmark)
+          );
+      });
+      it(`responds with 400 when no required fields supplied`, () => {
+        const idToUpdate = 2;
+        return supertest(app)
+          .patch(`/api/bookmarks/${idToUpdate}`)
+          .send({ irrelevantField: "foo" })
+          .expect(400, {
+            error: {
+              message: `Request body must content either 'title', 'style' or 'content'`
+            }
+          });
+      });
+      it(`responds with 204 when updating only a subset of fields`, () => {
+        const idToUpdate = 2;
+        const updateBookmark = {
+          title: "updated article title"
+        };
+        const expectedBookmark = {
+          ...testBookmarks[idToUpdate - 1],
+          ...updateBookmark
+        };
+
+        return supertest(app)
+          .patch(`/api/bookmarks/${idToUpdate}`)
+          .send({
+            ...updateBookmark,
+            fieldToIgnore: "should not be in GET response"
+          })
+          .expect(204)
+          .then(res =>
+            supertest(app)
+              .get(`/api/bookmarks/${idToUpdate}`)
+              .expect(expectedBookmark)
+          );
+      });
+    });
   });
 });

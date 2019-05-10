@@ -22,9 +22,9 @@ bookmarkRouter
   .get((req, res, next) => {
     const knexInstance = req.app.get("db");
     BookmarksService.getAllBookmarks(knexInstance)
-    
+
       .then(bookmarks => {
-        console.log(bookmarks)
+        console.log(bookmarks);
         res.json(bookmarks.map(serializeBookmark));
       })
       .catch(next);
@@ -50,18 +50,17 @@ bookmarkRouter
     }
     BookmarksService.insertBookmarks(req.app.get("db"), newBookmark)
       .then(bookmark => {
-        logger.info(`bookmark with id ${bookmark.id} created`)
+        logger.info(`bookmark with id ${bookmark.id} created`);
         res
           .status(201)
           .location(`/${bookmark.id}`)
           .json(serializeBookmark(bookmark));
       })
-      .catch(next)
+      .catch(next);
   });
 bookmarkRouter
   .route("/:id")
   .all((req, res, next) => {
-
     BookmarksService.getById(req.app.get("db"), req.params.id)
       .then(bookmark => {
         if (!bookmark) {
@@ -70,30 +69,31 @@ bookmarkRouter
           });
         }
         res.bookmark = bookmark;
-          next();
+        next();
       })
-      .catch(next)
+      .catch(next);
   })
-    .get((req, res, next)=>{
-      res.json(serializeBookmark(res.bookmark))
-    })  
-    
+  .get((req, res, next) => {
+    res.json(serializeBookmark(res.bookmark));
+  })
+
   .delete((req, res, next) => {
-    
-    BookmarksService.deleteBookmarks(req.app.get('db'), req.params.id)
-    .then(()=>{
-      logger.info(`Bookmark with id ${req.params.id} deleted.`)
-      res
-      .status(204).end();
-      
-      
-    })
-    .catch(next);
+    BookmarksService.deleteBookmarks(req.app.get("db"), req.params.id)
+      .then(() => {
+        logger.info(`Bookmark with id ${req.params.id} deleted.`);
+        res.status(204).end();
+      })
+      .catch(next);
   })
   .patch(bodyParser, (req, res, next) => {
     let { title, url_link, rating } = req.body;
-    const bookmarkToUpdate = { title, url_link, descript:req.body.descript, rating };
-    let {descript, ...requiredFieldsObj} = bookmarkToUpdate
+    const bookmarkToUpdate = {
+      title,
+      url_link,
+      descript: req.body.descript,
+      rating
+    };
+    let { descript, ...requiredFieldsObj } = bookmarkToUpdate;
     const numberOfValues = Object.values(requiredFieldsObj).filter(Boolean)
       .length;
     if (numberOfValues < 3) {
@@ -103,9 +103,9 @@ bookmarkRouter
         }
       });
     }
-    BookmarkService.updateBookmarks(
+    BookmarksService.updateBookmarks(
       req.app.get("db"),
-      req.params.bookmark_id,
+      req.params.id,
       bookmarkToUpdate
     )
       .then(numRowsAffected => {
