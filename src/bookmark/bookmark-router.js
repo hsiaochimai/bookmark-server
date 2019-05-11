@@ -94,15 +94,15 @@ bookmarkRouter
       rating
     };
     let { descript, ...requiredFieldsObj } = bookmarkToUpdate;
-    // const numberOfValues = Object.values(requiredFieldsObj).filter(Boolean)
-    //   .length;
-      for(let field of 'title url_link rating'.split(' ' )) 
-      { console.log(field) 
-        if(bookmarkToUpdate[field]!==undefined && !bookmarkToUpdate[field]){
-           //bail out 
-          return res.status(400).end()
-        }}
-      
+    const numberOfValues = Object.values(requiredFieldsObj).filter(Boolean)
+      .length;
+    if (numberOfValues === 0) {
+      return res.status(400).json({
+        error: {
+          message: `Request body must content either 'title, url_link, or rating'`
+        }
+      });
+    }
     BookmarksService.updateBookmarks(
       req.app.get("db"),
       req.params.id,
