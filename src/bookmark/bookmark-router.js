@@ -30,7 +30,7 @@ bookmarkRouter
       .catch(next);
   })
   .post(bodyParser, (req, res, next) => {
-    const { title, url_link, descript, rating } = req.body;
+    const { title, url_link, descript, rating } = serializeBookmark(req.body);
     const newBookmark = { title, url_link, descript, rating };
     for (const [key, value] of Object.entries(newBookmark)) {
       if (value === null || value === undefined) {
